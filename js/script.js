@@ -43,6 +43,21 @@ const handleAdd = (event) => {
   input.focus();
 };
 
+const updateTaskCount = (column) => {
+  const tasks = column.querySelector(".tasks").children;
+  const taskCount = tasks.length;
+  column.querySelector(".column-title h3").dataset.tasks = taskCount;
+};
+
+const observeTaskChanges = () => {
+  for (const column of columns) {
+    const observer = new MutationObserver(() => updateTaskCount(column));
+    observer.observe(column.querySelector(".tasks"), { childList: true });
+  }
+};
+
+observeTaskChanges();
+
 const createTask = (content) => {
   const task = document.createElement("div");
   task.className = "task";
