@@ -6,6 +6,51 @@ let currentTask = null;
 
 // function
 
+const handleDragover = (event) => {
+  event.preventDefault(); // allow drop
+
+  const draggedTask = document.querySelector(".dragging");
+  const target = event.target.closest(".task, .tasks");
+
+  if (!target || target === draggedTask) return;
+
+  if (target.classList.contains("tasks")) {
+    // target is the tasks element
+    const lastTask = target.lastElementChild;
+    if (!lastTask) {
+      // tasks empty
+      target.appendChild(draggedTask);
+    } else {
+      const { bottom } = lastTask.getBoundingClientRect();
+      event.clientY > bottom && target.appendChild(draggedTask);
+    }
+  } else {
+    // target is another task
+    const { top, height } = target.getBoundingClientRect();
+    const distance = top + height / 2;
+
+    if (event.clientY < distance) {
+      target.before(draggedTask);
+    } else {
+      target.after(draggedTask);
+    }
+  }
+};
+
+const handleDrop = (event) => {
+  event.preventDefault();
+};
+
+const handleDragend = (event) => {
+  event.target.classList.remove("dragging");
+};
+
+const handleDragstart = (event) => {
+  event.dataTransfer.dropEffect = "move";
+  event.dataTransfer.setData("text/plain", "");
+  requestAnimationFrame(() => event.target.classList.add("dragging"));
+};
+
 const handleDelete = (event) => {
   currentTask = event.target.closest(".task");
 
@@ -68,6 +113,9 @@ const createTask = (content) => {
         <button data-edit><i class="bi bi-pencil-square"></i></button>
         <button data-delete><i class="bi bi-trash"></i></button>
     </menu>`;
+  task.addEventListener("dragstart", handleDragstart);
+  task.addEventListener("dragend", handleDragend);
+
   return task;
 };
 
@@ -80,6 +128,13 @@ const createTaskInput = (text = "") => {
   input.addEventListener("blur", handleBlur);
   return input;
 };
+
+//dragover and drop
+tasksElements = columnsContainer.querySelectorAll(".tasks");
+for (const tasksEl of tasksElements) {
+  tasksEl.addEventListener("dragover", handleDragover);
+  tasksEl.addEventListener("drop", handleDrop);
+}
 
 // add, edit and delete task
 columnsContainer.addEventListener("click", (event) => {
@@ -98,3 +153,16 @@ modal.addEventListener("submit", () => currentTask && currentTask.remove());
 modal.querySelector("#cancel").addEventListener("click", () => modal.close());
 // clear current task
 modal.addEventListener("close", () => (currentTask = null));
+
+//
+let tasks = [
+  ["Write Report", "Code Review", "Team Meeting"],
+  ["Morning Workout", "Chill Time"],
+  ["Fix Bugs", "Submit Project"],
+];
+
+tasks.forEach((col, idx) => {
+  for (const item of col) {
+    columns[idx].querySelector(".tasks").appendChild(createTask(item));
+  }
+});

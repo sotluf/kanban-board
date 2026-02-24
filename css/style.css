@@ -53,7 +53,14 @@ button:is(:active, :hover) {
 
 .columns {
   display: flex;
+  flex-direction: column;
   gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .columns {
+    flex-direction: row;
+  }
 }
 
 .column {
