@@ -48,6 +48,7 @@ const handleDrop = (event) => {
 // when dragging ends
 const handleDragend = (event) => {
   event.target.classList.remove("dragging");
+  saveTasks();
 };
 
 // start dragging a task
@@ -71,6 +72,34 @@ const disableDarkmode = () => {
 if (darkmode === "active") {
   enableDarkmode();
 }
+
+// save and load tasks data to local storage
+const getTasksData = () => {
+  const data = [];
+
+  columns.forEach((column) => {
+    const tasks = column.querySelectorAll(".task > div:first-child");
+    data.push([...tasks].map((task) => task.innerText));
+  });
+
+  return data;
+};
+
+const saveTasks = () => {
+  localStorage.setItem("tasks", JSON.stringify(getTasksData()));
+};
+
+const loadTasks = () => {
+  const data = JSON.parse(localStorage.getItem("tasks"));
+  if (!data) return;
+
+  data.forEach((col, idx) => {
+    const tasksEl = columns[idx].querySelector(".tasks");
+    tasksEl.innerHTML = ""; // clear existing tasks
+
+    col.forEach((taskText) => tasksEl.appendChild(createTask(taskText)));
+  });
+};
 
 // 2. functions for edit and delete task
 
@@ -105,6 +134,7 @@ const handleBlur = (event) => {
   const content = input.innerHTML.trim() || "Untitled";
   const task = createTask(content);
   input.replaceWith(task);
+  saveTasks();
 };
 
 // 3. functions for add task
@@ -189,19 +219,14 @@ themeSwitch.addEventListener("click", () => {
 });
 
 // modal actions for delete
-modal.addEventListener("submit", () => currentTask && currentTask.remove());
+modal.addEventListener("submit", () => {
+  if (currentTask) {
+    currentTask.remove();
+    saveTasks();
+  }
+});
 modal.querySelector("#cancel").addEventListener("click", () => modal.close());
 modal.addEventListener("close", () => (currentTask = null));
 
-// 8. initiale tasks for demo
-let tasks = [
-  ["Write Report", "Code Review", "Team Meeting"],
-  ["Morning Workout", "Chill Time"],
-  ["Fix Bugs", "Submit Project"],
-];
-
-tasks.forEach((col, idx) => {
-  for (const item of col) {
-    columns[idx].querySelector(".tasks").appendChild(createTask(item));
-  }
-});
+// 8. get tasks data from local storage when page loads
+loadTasks();
