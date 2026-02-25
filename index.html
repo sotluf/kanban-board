@@ -12,11 +12,14 @@
     <script src="/js/script.js" defer></script>
   </head>
   <body>
+    <!-- header -->
     <div class="container">
       <h1>Task List</h1>
     </div>
 
+    <!-- container for columns Kanban board -->
     <div class="container columns">
+      <!-- 1. to do column -->
       <div class="column">
         <div class="column-title">
           <h3 data-tasks="0">To Do</h3>
@@ -24,7 +27,7 @@
         </div>
         <div class="tasks"></div>
       </div>
-
+      <!-- 2. in progress column -->
       <div class="column">
         <div class="column-title">
           <h3 data-tasks="0">In Progress</h3>
@@ -32,7 +35,7 @@
         </div>
         <div class="tasks"></div>
       </div>
-
+      <!-- 3. done column -->
       <div class="column">
         <div class="column-title">
           <h3 data-tasks="0">Done</h3>
@@ -42,7 +45,7 @@
       </div>
     </div>
 
-    <!-- confirmation of delete -->
+    <!-- modal for confirmation of delete -->
     <dialog class="confirm-modal">
       <form method="dialog">
         <h3>Delete Task?</h3>

@@ -4,8 +4,9 @@ const columns = columnsContainer.querySelectorAll(".column");
 
 let currentTask = null;
 
-// function
+// 1. function for drag and drop
 
+// when dragging over a task or tasks container
 const handleDragover = (event) => {
   event.preventDefault(); // allow drop
 
@@ -37,20 +38,26 @@ const handleDragover = (event) => {
   }
 };
 
+// when dropping a task
 const handleDrop = (event) => {
   event.preventDefault();
 };
 
+// when dragging ends
 const handleDragend = (event) => {
   event.target.classList.remove("dragging");
 };
 
+// start dragging a task
 const handleDragstart = (event) => {
   event.dataTransfer.dropEffect = "move";
   event.dataTransfer.setData("text/plain", "");
   requestAnimationFrame(() => event.target.classList.add("dragging"));
 };
 
+// 2. functions for edit and delete task
+
+// delete task
 const handleDelete = (event) => {
   currentTask = event.target.closest(".task");
 
@@ -62,6 +69,7 @@ const handleDelete = (event) => {
   modal.showModal();
 };
 
+// edit task
 const handleEdit = (event) => {
   const task = event.target.closest(".task");
   const input = createTaskInput(task.innerText);
@@ -74,12 +82,15 @@ const handleEdit = (event) => {
   selection.collapseToEnd();
 };
 
+// finish editing task and create a new task element
 const handleBlur = (event) => {
   const input = event.target;
   const content = input.innerHTML.trim() || "Untitled";
   const task = createTask(content);
   input.replaceWith(task);
 };
+
+// 3. functions for add task
 
 const handleAdd = (event) => {
   const tasksEl = event.target.closest(".column").lastElementChild;
@@ -88,12 +99,16 @@ const handleAdd = (event) => {
   input.focus();
 };
 
+// 4. observe changes in tasks and update task count in column title
+
+// update task count in column title
 const updateTaskCount = (column) => {
   const tasks = column.querySelector(".tasks").children;
   const taskCount = tasks.length;
   column.querySelector(".column-title h3").dataset.tasks = taskCount;
 };
 
+// automatically update task count
 const observeTaskChanges = () => {
   for (const column of columns) {
     const observer = new MutationObserver(() => updateTaskCount(column));
@@ -103,6 +118,9 @@ const observeTaskChanges = () => {
 
 observeTaskChanges();
 
+// 5. helper functions to create task and task input elements
+
+//create html element for task
 const createTask = (content) => {
   const task = document.createElement("div");
   task.className = "task";
@@ -119,6 +137,7 @@ const createTask = (content) => {
   return task;
 };
 
+// create input element for editing or adding task
 const createTaskInput = (text = "") => {
   const input = document.createElement("div");
   input.className = "task-input";
@@ -129,14 +148,14 @@ const createTaskInput = (text = "") => {
   return input;
 };
 
-//dragover and drop
-tasksElements = columnsContainer.querySelectorAll(".tasks");
+// 6. event listeners for drag and drop
+const tasksElements = columnsContainer.querySelectorAll(".tasks");
 for (const tasksEl of tasksElements) {
   tasksEl.addEventListener("dragover", handleDragover);
   tasksEl.addEventListener("drop", handleDrop);
 }
 
-// add, edit and delete task
+// 7. event listener for add, edit and delete buttons
 columnsContainer.addEventListener("click", (event) => {
   if (event.target.closest("button[data-add]")) {
     handleAdd(event);
@@ -147,14 +166,12 @@ columnsContainer.addEventListener("click", (event) => {
   }
 });
 
-// confirm deletion
+// modal actions for delete
 modal.addEventListener("submit", () => currentTask && currentTask.remove());
-// cancel deletion
 modal.querySelector("#cancel").addEventListener("click", () => modal.close());
-// clear current task
 modal.addEventListener("close", () => (currentTask = null));
 
-//
+// 8. initiale tasks for demo
 let tasks = [
   ["Write Report", "Code Review", "Team Meeting"],
   ["Morning Workout", "Chill Time"],

@@ -32,6 +32,7 @@ h1 {
   margin: 32px 0;
 }
 
+/* style for buttons */
 button {
   cursor: pointer;
   border: none;
@@ -46,14 +47,16 @@ button:is(:active, :hover) {
   opacity: 1;
 }
 
+/* container */
 .container {
   width: min(1200px, 90%);
   margin: 0 auto;
 }
 
+/* columns */
 .columns {
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* stack columns vertically on small screens */
   gap: 24px;
 }
 
@@ -64,12 +67,13 @@ button:is(:active, :hover) {
 }
 
 .column {
-  flex: 1;
+  flex: 1; /* equal width for all columns */
   display: grid;
   grid-template-rows: var(--task-size) 1fr;
   gap: 8px;
 }
 
+/* column titles */
 .column-title {
   display: flex;
   align-items: center;
@@ -95,6 +99,7 @@ button:is(:active, :hover) {
   font-size: 32px;
 }
 
+/* container for tasks */
 .tasks {
   min-height: var(--task-size);
   display: grid;
@@ -111,11 +116,12 @@ button:is(:active, :hover) {
   min-height: var(--task-size);
 }
 
+/* draggable tasks */
 .task {
   cursor: move;
   transition: 0.3s;
 }
-
+/* style for dragging task */
 .task.dragging {
   cursor: default;
   box-shadow: none;
@@ -131,6 +137,7 @@ button:is(:active, :hover) {
   background: var(--task-color);
 }
 
+/* task menu with edit and delete buttons */
 .task menu {
   margin-top: 14px;
   display: flex;
@@ -144,6 +151,7 @@ button:is(:active, :hover) {
   font-size: 20px;
 }
 
+/* input for adding and editing tasks */
 .task-input {
   outline: none;
   overflow-wrap: anywhere;
@@ -165,6 +173,7 @@ button:is(:active, :hover) {
   opacity: 0.5;
 }
 
+/* confirm modal for delete */
 .confirm-modal[open] {
   opacity: 1;
   transform: translate(-50%, -50%) translateY(0);
@@ -240,6 +249,7 @@ button:is(:active, :hover) {
   box-shadow: 0 1px 2px -1px rgba(0, 0, 0, 0.1);
 }
 
+/* styles for cancel and confirm buttons in modal */
 .confirm-modal button#cancel {
   border-color: var(--cancel-color);
 }
