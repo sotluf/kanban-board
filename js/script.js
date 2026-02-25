@@ -3,8 +3,10 @@ const columnsContainer = document.querySelector(".columns");
 const columns = columnsContainer.querySelectorAll(".column");
 
 let currentTask = null;
+let darkmode = localStorage.getItem("darkmode");
+const themeSwitch = document.getElementById("theme-switch");
 
-// 1. function for drag and drop
+// 1. function for drag and drop, darkmode toggle
 
 // when dragging over a task or tasks container
 const handleDragover = (event) => {
@@ -54,6 +56,21 @@ const handleDragstart = (event) => {
   event.dataTransfer.setData("text/plain", "");
   requestAnimationFrame(() => event.target.classList.add("dragging"));
 };
+
+// toggle dark mode
+const enableDarkmode = () => {
+  document.body.classList.add("darkmode");
+  localStorage.setItem("darkmode", "active");
+};
+
+const disableDarkmode = () => {
+  document.body.classList.remove("darkmode");
+  localStorage.setItem("darkmode", null);
+};
+
+if (darkmode === "active") {
+  enableDarkmode();
+}
 
 // 2. functions for edit and delete task
 
@@ -155,7 +172,7 @@ for (const tasksEl of tasksElements) {
   tasksEl.addEventListener("drop", handleDrop);
 }
 
-// 7. event listener for add, edit and delete buttons
+// 7. event listener for add, edit, delete and toggle buttons
 columnsContainer.addEventListener("click", (event) => {
   if (event.target.closest("button[data-add]")) {
     handleAdd(event);
@@ -164,6 +181,11 @@ columnsContainer.addEventListener("click", (event) => {
   } else if (event.target.closest("button[data-delete]")) {
     handleDelete(event);
   }
+});
+
+themeSwitch.addEventListener("click", () => {
+  darkmode = localStorage.getItem("darkmode");
+  darkmode !== "active" ? enableDarkmode() : disableDarkmode();
 });
 
 // modal actions for delete

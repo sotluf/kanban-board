@@ -10,6 +10,24 @@
   --confirm-color: #dc2626;
   --confirm-hover-color: #b91c1c;
   --task-size: 48px;
+  --tasks-background: #f6f6f6;
+  --count-color: #ffff00;
+  --modal-color: #ffffff;
+}
+
+.darkmode {
+  --bg-color: #1e293b;
+  --text-color: #ffffff;
+  --primary-color: #ffffff;
+  --secondary-color: #64748b;
+  --task-color: #334155;
+  --cancel-color: #e5e7eb;
+  --confirm-color: #dc2626;
+  --confirm-hover-color: #b91c1c;
+  --task-size: 48px;
+  --tasks-background: #334155;
+  --count-color: #fbbf24;
+  --modal-color: #475569;
 }
 
 /* common style for all elements*/
@@ -30,6 +48,34 @@ body {
 
 h1 {
   margin: 32px 0;
+}
+
+/* theme switch button */
+#theme-switch {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  border-radius: 50%;
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#theme-switch i:last-child {
+  display: none;
+}
+
+.darkmode #theme-switch i:first-child {
+  display: none;
+}
+
+.darkmode #theme-switch i:last-child {
+  display: block;
 }
 
 /* style for buttons */
@@ -88,7 +134,7 @@ button:is(:active, :hover) {
 
 .column-title h3::after {
   content: attr(data-tasks);
-  background: yellow;
+  background: var(--count-color);
   margin-left: 4px;
   border-radius: 4px;
   padding: 0 4px;
@@ -108,7 +154,7 @@ button:is(:active, :hover) {
 }
 
 .tasks > * {
-  background: #fff;
+  background: var(--tasks-background);
   border-radius: 4px;
   padding: 14px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -188,6 +234,8 @@ button:is(:active, :hover) {
   border-radius: 4px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.3s allow-discrete;
+  background: var(--modal-color);
+  color: var(--text-color);
 }
 
 .confirm-modal[open]::backdrop {
