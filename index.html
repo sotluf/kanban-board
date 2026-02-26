@@ -17,29 +17,37 @@
       <i class="bi bi-moon-fill"></i><i class="bi bi-sun-fill"></i>
     </button>
     <div class="container">
-      <h1>Task List</h1>
+      <h1>Kanban board — Tasks</h1>
     </div>
 
     <!-- container for columns Kanban board -->
     <div class="container columns">
       <!-- 1. to do column -->
-      <div class="column">
+      <div class="column todo">
         <div class="column-title">
-          <h3 data-tasks="0">To Do</h3>
+          <h3 data-tasks="0">To do</h3>
           <button data-add><i class="bi bi-plus"></i></button>
         </div>
         <div class="tasks"></div>
       </div>
       <!-- 2. in progress column -->
-      <div class="column">
+      <div class="column progress">
         <div class="column-title">
-          <h3 data-tasks="0">In Progress</h3>
+          <h3 data-tasks="0">In progress</h3>
           <button data-add><i class="bi bi-plus"></i></button>
         </div>
         <div class="tasks"></div>
       </div>
-      <!-- 3. done column -->
-      <div class="column">
+      <!-- 3. in review column -->
+      <div class="column review">
+        <div class="column-title">
+          <h3 data-tasks="0">In review</h3>
+          <button data-add><i class="bi bi-plus"></i></button>
+        </div>
+        <div class="tasks"></div>
+      </div>
+      <!-- 4. done column -->
+      <div class="column done">
         <div class="column-title">
           <h3 data-tasks="0">Done</h3>
           <button data-add><i class="bi bi-plus"></i></button>
@@ -52,7 +60,7 @@
     <dialog class="confirm-modal">
       <form method="dialog">
         <h3>Delete Task?</h3>
-        <p>You are about to delete the task</p>
+        <p>You are about to delete the task:</p>
         <div class="preview"></div>
         <menu>
           <button type="button" id="cancel">Cancel</button>

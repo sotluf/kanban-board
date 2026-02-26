@@ -1,38 +1,41 @@
-@import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap");
-
 :root {
-  --bg-color: rgb(245, 248, 229);
+  --bg-color: #f5f7fb;
+
+  --todo-background: #ff595e;
+  --progress-background: #ffca3a;
+  --review-background: #8ac926;
+  --done-background: #1982c4;
+
   --text-color: #404040;
-  --primary-color: #475569;
-  --secondary-color: #cbd5e1;
-  --task-color: #f6f6f6;
+  --primary-color: #404040;
+  --secondary-color: #d8d8d8;
+
+  --task-color: #ffffff;
+
   --cancel-color: #e5e7eb;
   --confirm-color: #dc2626;
   --confirm-hover-color: #b91c1c;
+
   --task-size: 48px;
-  --tasks-background: #f6f6f6;
-  --count-color: #ffff00;
+  --tasks-background: #f6f6f6; /* трошки сіріше*/
   --modal-color: #ffffff;
 }
 
 .darkmode {
-  --bg-color: #1e293b;
-  --text-color: #ffffff;
-  --primary-color: #ffffff;
-  --secondary-color: #64748b;
-  --task-color: #334155;
-  --cancel-color: #e5e7eb;
-  --confirm-color: #dc2626;
-  --confirm-hover-color: #b91c1c;
-  --task-size: 48px;
-  --tasks-background: #334155;
-  --count-color: #fbbf24;
-  --modal-color: #475569;
+  --bg-color: #100e09;
+
+  --text-color: #f2f2f2;
+  --primary-color: #f2f2f2;
+  --secondary-color: #353535;
+
+  --task-color: #2a2a2a;
+  --tasks-background: #353535;
+  --modal-color: #353535;
 }
 
 /* common style for all elements*/
 * {
-  font-family: Lato, sans-serif;
+  font-family: system-ui;
   padding: 0;
   margin: 0;
   box-sizing: border-box;
@@ -42,8 +45,6 @@ body {
   background: var(--bg-color);
   color: var(--text-color);
   min-height: 100vh; /* equals 100% of the total viewport */
-  display: grid;
-  grid-template-rows: auto 1fr;
 }
 
 h1 {
@@ -57,7 +58,6 @@ h1 {
   right: 20px;
   width: 50px;
   height: 50px;
-  padding: 0;
   border-radius: 50%;
   background-color: var(--secondary-color);
   color: var(--primary-color);
@@ -69,11 +69,9 @@ h1 {
 #theme-switch i:last-child {
   display: none;
 }
-
 .darkmode #theme-switch i:first-child {
   display: none;
 }
-
 .darkmode #theme-switch i:last-child {
   display: block;
 }
@@ -83,14 +81,14 @@ button {
   cursor: pointer;
   border: none;
   background: transparent;
-  outline-color: var(--secondary-color);
   color: var(--primary-color);
-  transition: 0.3s;
-  opacity: 0.5;
+  transition: 0.25s;
+  opacity: 0.6;
 }
 
 button:is(:active, :hover) {
   opacity: 1;
+  transform: scale(1.1);
 }
 
 /* container */
@@ -103,70 +101,109 @@ button:is(:active, :hover) {
 .columns {
   display: flex;
   flex-direction: column; /* stack columns vertically on small screens */
-  gap: 24px;
+  gap: 20px;
+  align-items: stretch;
 }
 
 @media (min-width: 768px) {
   .columns {
     flex-direction: row;
+    align-items: flex-start;
   }
 }
 
 .column {
   flex: 1; /* equal width for all columns */
-  display: grid;
-  grid-template-rows: var(--task-size) 1fr;
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 4px 4px 16px 16px;
+  background: var(--tasks-background);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  transition: 0.25s;
+  position: relative;
+}
+
+.column:hover {
+  transform: translateY(-4px);
+}
+.column::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  border-radius: 16px 16px 0 0;
+}
+
+.column.todo::before {
+  background: var(--todo-background);
+}
+.column.progress::before {
+  background: var(--progress-background);
+}
+.column.review::before {
+  background: var(--review-background);
+}
+.column.done::before {
+  background: var(--done-background);
 }
 
 /* column titles */
 .column-title {
   display: flex;
   align-items: center;
-  border-bottom: 1px solid var(--secondary-color);
-  color: var(--primary-color);
 }
 
 .column-title h3 {
-  font-size: 16px;
-  text-transform: uppercase;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
 }
 
 .column-title h3::after {
   content: attr(data-tasks);
-  background: var(--count-color);
-  margin-left: 4px;
-  border-radius: 4px;
-  padding: 0 4px;
+  margin-left: 8px;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .column-title button {
   margin-left: auto;
-  font-size: 32px;
+  font-size: 28px;
 }
 
 /* container for tasks */
 .tasks {
   min-height: var(--task-size);
-  display: grid;
-  align-content: start;
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .tasks > * {
-  background: var(--tasks-background);
-  border-radius: 4px;
+  background: var(--tasks-color);
+  border-radius: 10px;
   padding: 14px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
   position: relative;
   min-height: var(--task-size);
+  transition: 0.25s;
+}
+
+.tasks > *:hover {
+  transform: translateY(-3px);
 }
 
 /* draggable tasks */
 .task {
-  cursor: move;
-  transition: 0.3s;
+  cursor: grab;
 }
+
 /* style for dragging task */
 .task.dragging {
   cursor: default;
@@ -194,7 +231,7 @@ button:is(:active, :hover) {
 .task button {
   width: 24px;
   height: 24px;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 /* input for adding and editing tasks */
@@ -221,19 +258,17 @@ button:is(:active, :hover) {
 
 /* confirm modal for delete */
 .confirm-modal[open] {
-  opacity: 1;
-  transform: translate(-50%, -50%) translateY(0);
+  transform: translate(-50%, -50%);
 }
 
 .confirm-modal {
-  opacity: 1;
-  transform: translate(-50%, -50%) translateY(50px);
+  transform: translate(-50%, -50%) translateY(40px);
   left: 50%;
   top: 50%;
   border: none;
-  border-radius: 4px;
+  border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s allow-discrete;
+  transition: 0.3s;
   background: var(--modal-color);
   color: var(--text-color);
 }
@@ -244,7 +279,7 @@ button:is(:active, :hover) {
 
 .confirm-modal::backdrop {
   background: rgba(0, 0, 0, 0);
-  transition: all 0.3s allow-discrete;
+  transition: 0.3s;
 }
 
 @starting-style {
@@ -267,16 +302,12 @@ button:is(:active, :hover) {
 }
 
 .confirm-modal h3 {
-  font-size: 24px;
+  font-size: 22px;
 }
 
 .confirm-modal div.preview {
   font-size: 14px;
-  padding-left: 8px;
-  border-left: 2px solid var(--secondary-color);
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2; /* truncate to two lines */
+  padding-left: 10px;
   line-clamp: 2;
   overflow: hidden;
   opacity: 0.75;
@@ -292,7 +323,7 @@ button:is(:active, :hover) {
   opacity: 1;
   font-size: 16px;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 6px;
   border: 1px solid transparent;
   box-shadow: 0 1px 2px -1px rgba(0, 0, 0, 0.1);
 }
