@@ -2,6 +2,8 @@
 
 A clean, responsive, and persistent Kanban board created with vanilla HTML, CSS, and JavaScript. This project provides a simple and intuitive interface for managing tasks across four distinct stages: To do, In progress, In review, and Done.
 
+Live Demo: https://sotluf.github.io/kanban-board/
+
 ## Table of contents
 1. [Features](#features)
 2. [How to Use](#how-to-use)
