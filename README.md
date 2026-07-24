@@ -1,8 +1,8 @@
 # Kanban Board
 
-A clean, responsive, and persistent Kanban board created with vanilla HTML, CSS, and JavaScript. This project provides a simple and intuitive interface for managing tasks across four distinct stages: To do, In progress, In review, and Done.
+A clean, responsive, and persistent Kanban board created with vanilla HTML, CSS, and JavaScript. This project provides a simple and intuitive interface for managing tasks across four distinct stages: Backlog, To do, In progress, and Done.
 
-Live Demo: https://sotluf.github.io/kanban-board/
+Live Demo: https://kanban-board-sotluf.vercel.app/ 
 
 ## Table of contents
 1. [Features](#features)
@@ -14,9 +14,12 @@ Live Demo: https://sotluf.github.io/kanban-board/
 
 *   **Drag & Drop:** Easily move tasks between columns or reorder them within a column.
 *   **CRUD Operations:**
-    *   **Create:** Add new tasks directly to any column.
-    *   **Edit:** Click the edit icon to modify task content in place.
+    *   **Create:** Add new tasks to any column through a dedicated form.
+    *   **Edit:** Click the edit icon to open the same form pre-filled with the task's current data to update it.
     *   **Delete:** Remove tasks with a confirmation dialog to prevent accidental deletion.
+*   **Task Details:** Each task can have a title, an optional description, a priority level (Undefined, Low, Medium, High), and a deadline.
+*   **Overdue Highlighting:** Deadlines that have passed are automatically highlighted.
+*   **Sorting:** Sort tasks within each column by priority or by deadline.
 *   **Data Persistence:** Your tasks are automatically saved to the browser's local storage, so you won't lose your progress when you close the tab or refresh the page.
 *   **Light & Dark Mode:** Toggle between a light and dark theme using the theme switch button. Your preference is saved in local storage.
 *   **Dynamic Task Counter:** The header of each column automatically updates to show the current number of tasks it contains.
@@ -37,9 +40,13 @@ cd kanban-board
 
 ### Task Management
 
--   **Adding a task:** Click the `+` button at the top of any column. An input field will appear where you can type your task. Click outside the input field to save.
--   **Editing a task:** Hover over a task to reveal the menu. Click the `pencil icon` to edit the task's text directly.
--   **Deleting a task:** Click the `trash icon`. A confirmation modal will appear to prevent accidental deletion.
+-   **Adding a task:** Click the `+` button at the top of any column (or the "New task" button at the bottom) to open the task form. Fill in the title and click "Save". Description, priority, and deadline are optional.
+-   **Editing a task:** Hover over a task to reveal the menu. Click the `pencil icon` to open the same form pre-filled with the task's data.
+-   **Deleting a task:** Click the `x icon`. A confirmation modal will appear to prevent accidental deletion.
+
+### Sorting
+
+Click the `filter icon` in a column's header to open its sorting options. Each column has its own sort order. Choose to sort by priority or by deadline.
 
 ### Drag and Drop
 
@@ -51,6 +58,6 @@ All tasks and the current theme `light/dark` are saved in your browser's local s
 
 ## File Structure
 
--   `index.html`: The main HTML file that defines the structure of the Kanban board, including the columns, task containers, and the delete confirmation modal.
+-   `index.html`: The main HTML file that defines the structure of the Kanban board, including the columns, task containers, the add/edit task modal, and the delete confirmation modal.
 -   `css/style.css`: Contains all the styling for the application. It uses CSS variables and is fully responsive.
 -   `js/script.js`: The core logic of the application. This vanilla JavaScript file handles all functionality.
