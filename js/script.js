@@ -1,64 +1,14 @@
 const modal = document.querySelector(".confirm-modal");
+const taskModal = document.querySelector(".task-modal");
 const columnsContainer = document.querySelector(".columns");
 const columns = columnsContainer.querySelectorAll(".column");
 
+let currentColumn = null;
 let currentTask = null;
 let darkmode = localStorage.getItem("darkmode");
 const themeSwitch = document.getElementById("theme-switch");
 
-// 1. function for drag and drop, darkmode toggle
-
-// when dragging over a task or tasks container
-const handleDragover = (event) => {
-  event.preventDefault(); // allow drop
-
-  const draggedTask = document.querySelector(".dragging");
-  const target = event.target.closest(".task, .tasks");
-
-  if (!target || target === draggedTask) return;
-
-  if (target.classList.contains("tasks")) {
-    // target is the tasks element
-    const lastTask = target.lastElementChild;
-    if (!lastTask) {
-      // tasks empty
-      target.appendChild(draggedTask);
-    } else {
-      const { bottom } = lastTask.getBoundingClientRect();
-      event.clientY > bottom && target.appendChild(draggedTask);
-    }
-  } else {
-    // target is another task
-    const { top, height } = target.getBoundingClientRect();
-    const distance = top + height / 2;
-
-    if (event.clientY < distance) {
-      target.before(draggedTask);
-    } else {
-      target.after(draggedTask);
-    }
-  }
-};
-
-// when dropping a task
-const handleDrop = (event) => {
-  event.preventDefault();
-};
-
-// when dragging ends
-const handleDragend = (event) => {
-  event.target.classList.remove("dragging");
-  saveTasks();
-};
-
-// start dragging a task
-const handleDragstart = (event) => {
-  event.dataTransfer.dropEffect = "move";
-  event.dataTransfer.setData("text/plain", "");
-  requestAnimationFrame(() => event.target.classList.add("dragging"));
-};
-
-// toggle dark mode
+// DARK MODE
 const enableDarkmode = () => {
   document.body.classList.add("darkmode");
   localStorage.setItem("darkmode", "active");
@@ -66,20 +16,25 @@ const enableDarkmode = () => {
 
 const disableDarkmode = () => {
   document.body.classList.remove("darkmode");
-  localStorage.setItem("darkmode", null);
+  localStorage.removeItem("darkmode");
 };
 
 if (darkmode === "active") {
   enableDarkmode();
 }
 
-// save and load tasks data to local storage
+themeSwitch.addEventListener("click", () => {
+  darkmode = localStorage.getItem("darkmode");
+  darkmode !== "active" ? enableDarkmode() : disableDarkmode();
+});
+
+// LOCAL STORAGE
 const getTasksData = () => {
   const data = [];
 
   columns.forEach((column) => {
-    const tasks = column.querySelectorAll(".task > div:first-child");
-    data.push([...tasks].map((task) => task.innerText));
+    const tasks = column.querySelectorAll(".task");
+    data.push([...tasks].map((task) => JSON.parse(task.dataset.task)));
   });
 
   return data;
@@ -97,57 +52,166 @@ const loadTasks = () => {
     const tasksEl = columns[idx].querySelector(".tasks");
     tasksEl.innerHTML = ""; // clear existing tasks
 
-    col.forEach((taskText) => tasksEl.appendChild(createTask(taskText)));
+    col.forEach((taskObj) => tasksEl.appendChild(createTask(taskObj)));
   });
 };
 
-// 2. functions for edit and delete task
+// FORMATING, SORTING, FILTERING
+const formatDeadline = (dateStr) => {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
 
-// delete task
-const handleDelete = (event) => {
-  currentTask = event.target.closest(".task");
-
-  // show preview
-  modal.querySelector(".preview").innerText = currentTask.innerText.substring(
-    0,
-    100,
-  );
-  modal.showModal();
+  return date.toLocaleDateString("en-US", { day: "numeric", month: "short" });
 };
 
-// edit task
-const handleEdit = (event) => {
-  const task = event.target.closest(".task");
-  const input = createTaskInput(task.innerText);
-  task.replaceWith(input);
-  input.focus();
+const isOverdue = (dateStr) => {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const deadline = new Date(year, month - 1, day);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  //move cursor to the end
-  const selection = window.getSelection();
-  selection.selectAllChildren(input);
-  selection.collapseToEnd();
+  return deadline < today;
 };
 
-// finish editing task and create a new task element
-const handleBlur = (event) => {
-  const input = event.target;
-  const content = input.innerHTML.trim() || "Untitled";
-  const task = createTask(content);
-  input.replaceWith(task);
+const priorityOrder = { Undefined: 0, Low: 1, Medium: 2, High: 3 };
+
+const sortTasks = (column, mode) => {
+  const tasksEl = column.querySelector(".tasks");
+  const tasks = [...tasksEl.querySelectorAll(".task")];
+
+  if (mode === "none") return;
+
+  tasks.sort((a, b) => {
+    const dataA = JSON.parse(a.dataset.task);
+    const dataB = JSON.parse(b.dataset.task);
+
+    if (mode === "priority-asc") {
+      return priorityOrder[dataA.priority] - priorityOrder[dataB.priority];
+    }
+    if (mode === "priority-desc") {
+      return priorityOrder[dataB.priority] - priorityOrder[dataA.priority];
+    }
+
+    const deadlineA = dataA.deadline ? new Date(dataA.deadline) : null;
+    const deadlineB = dataB.deadline ? new Date(dataB.deadline) : null;
+
+    if (!deadlineA && !deadlineB) return 0;
+    if (!deadlineA) return 1;
+    if (!deadlineB) return -1;
+
+    return mode === "deadline-asc"
+      ? deadlineA - deadlineB
+      : deadlineB - deadlineA;
+  });
+
+  tasks.forEach((task) => tasksEl.appendChild(task));
   saveTasks();
 };
 
-// 3. functions for add task
+//create html element for task
+const createTask = (data) => {
+  const task = document.createElement("div");
+  task.className = "task";
+  task.draggable = true;
+  task.dataset.task = JSON.stringify(data);
 
-const handleAdd = (event) => {
-  const tasksEl = event.target.closest(".column").lastElementChild;
-  const input = createTaskInput();
-  tasksEl.appendChild(input);
-  input.focus();
+  task.innerHTML = `
+   <div class="task-nav"> 
+        ${data.priority ? `<span class="priority ${data.priority}">${data.priority}</span>` : ""}
+        ${
+          data.deadline
+            ? `<span class="deadline${isOverdue(data.deadline) ? " overdue" : ""}">${formatDeadline(data.deadline)}</span>`
+            : ""
+        }
+    </div>
+
+    <h4>${data.title}</h4>
+    ${data.description ? `<p>${data.description}</p>` : ""}
+   
+    <menu>
+        <button data-edit><i class="bi bi-pencil"></i></button>
+        <button data-delete><i class="bi bi-x-lg"></i></button>
+    </menu>`;
+
+  task.addEventListener("dragstart", handleDragstart);
+  task.addEventListener("dragend", handleDragend);
+
+  return task;
 };
 
-// 4. observe changes in tasks and update task count in column title
+// ADD, EDIT, DELETE TASKS
+const handleDelete = (event) => {
+  currentTask = event.target.closest(".task");
+  const data = JSON.parse(currentTask.dataset.task);
 
+  modal.querySelector(".preview").innerText = data.title;
+  modal.showModal();
+};
+
+const handleEdit = (event) => {
+  currentTask = event.target.closest(".task");
+  const data = JSON.parse(currentTask.dataset.task);
+
+  taskModal.querySelector("h3").textContent = "Edit Task";
+  const form = taskModal.querySelector("form");
+  form.querySelector("#task-title").value = data.title;
+  form.querySelector("#task-description").value = data.description;
+  form.querySelector("#task-priority").value = data.priority;
+  form.querySelector("#task-due-date").value = data.deadline;
+
+  taskModal.showModal();
+};
+
+taskModal.querySelector("form").addEventListener("submit", (event) => {
+  const formData = new FormData(event.target);
+
+  const data = {
+    title: formData.get("task-title"),
+    description: formData.get("task-description"),
+    priority: formData.get("task-priority"),
+    deadline: formData.get("task-due-date"),
+  };
+
+  if (currentTask) {
+    currentTask.replaceWith(createTask(data));
+  } else {
+    currentColumn.appendChild(createTask(data));
+  }
+
+  saveTasks();
+});
+
+const handleAdd = (event) => {
+  currentColumn = event.target.closest(".column").querySelector(".tasks");
+  currentTask = null;
+  taskModal.querySelector("h3").textContent = "Add Task";
+  taskModal.querySelector("form").reset();
+  taskModal.showModal();
+};
+
+// modal actions for delete
+modal.addEventListener("submit", () => {
+  if (currentTask) {
+    currentTask.remove();
+    saveTasks();
+  }
+});
+modal
+  .querySelector("#delete-cancel")
+  .addEventListener("click", () => modal.close());
+modal.addEventListener("close", () => (currentTask = null));
+
+// modal actions for add/edit
+taskModal
+  .querySelector("#task-cancel")
+  .addEventListener("click", () => taskModal.close());
+
+taskModal.addEventListener("close", () => {
+  currentTask = null;
+  currentColumn = null;
+});
+
+// TASK COUNT
 // update task count in column title
 const updateTaskCount = (column) => {
   const tasks = column.querySelector(".tasks").children;
@@ -165,44 +229,59 @@ const observeTaskChanges = () => {
 
 observeTaskChanges();
 
-// 5. helper functions to create task and task input elements
+// DRAG AND DROP
+// when dragging over a task or tasks container
+const handleDragover = (event) => {
+  event.preventDefault();
 
-//create html element for task
-const createTask = (content) => {
-  const task = document.createElement("div");
-  task.className = "task";
-  task.draggable = true;
-  task.innerHTML = `
-    <div>${content}</div>
-    <menu>
-        <button data-edit><i class="bi bi-pencil-square"></i></button>
-        <button data-delete><i class="bi bi-trash"></i></button>
-    </menu>`;
-  task.addEventListener("dragstart", handleDragstart);
-  task.addEventListener("dragend", handleDragend);
+  const draggedTask = document.querySelector(".dragging");
+  const target = event.target.closest(".task, .tasks");
 
-  return task;
+  if (!target || target === draggedTask) return;
+
+  if (target.classList.contains("tasks")) {
+    const lastTask = target.lastElementChild;
+    if (!lastTask) {
+      target.appendChild(draggedTask);
+    } else {
+      const { bottom } = lastTask.getBoundingClientRect();
+      event.clientY > bottom && target.appendChild(draggedTask);
+    }
+  } else {
+    const { top, height } = target.getBoundingClientRect();
+    const distance = top + height / 2;
+
+    if (event.clientY < distance) {
+      target.before(draggedTask);
+    } else {
+      target.after(draggedTask);
+    }
+  }
 };
 
-// create input element for editing or adding task
-const createTaskInput = (text = "") => {
-  const input = document.createElement("div");
-  input.className = "task-input";
-  input.dataset.placeholder = "Task name";
-  input.contentEditable = true;
-  input.innerText = text;
-  input.addEventListener("blur", handleBlur);
-  return input;
+const handleDrop = (event) => {
+  event.preventDefault();
 };
 
-// 6. event listeners for drag and drop
+const handleDragend = (event) => {
+  event.target.classList.remove("dragging");
+  saveTasks();
+};
+
+const handleDragstart = (event) => {
+  event.dataTransfer.dropEffect = "move";
+  event.dataTransfer.setData("text/plain", "");
+  requestAnimationFrame(() => event.target.classList.add("dragging"));
+};
+
 const tasksElements = columnsContainer.querySelectorAll(".tasks");
 for (const tasksEl of tasksElements) {
   tasksEl.addEventListener("dragover", handleDragover);
   tasksEl.addEventListener("drop", handleDrop);
 }
 
-// 7. event listener for add, edit, delete and toggle buttons
+// EVENT DELEGATION
+// event listener for add, edit, delete and toggle buttons
 columnsContainer.addEventListener("click", (event) => {
   if (event.target.closest("button[data-add]")) {
     handleAdd(event);
@@ -210,23 +289,24 @@ columnsContainer.addEventListener("click", (event) => {
     handleEdit(event);
   } else if (event.target.closest("button[data-delete]")) {
     handleDelete(event);
+  } else if (event.target.closest("button[data-filter]")) {
+    const dropdown = event.target
+      .closest(".filter-wrapper")
+      .querySelector(".filter-dropdown");
+    dropdown.classList.toggle("open");
+  } else {
+    document
+      .querySelectorAll(".filter-dropdown.open")
+      .forEach((d) => d.classList.remove("open"));
   }
 });
 
-themeSwitch.addEventListener("click", () => {
-  darkmode = localStorage.getItem("darkmode");
-  darkmode !== "active" ? enableDarkmode() : disableDarkmode();
-});
-
-// modal actions for delete
-modal.addEventListener("submit", () => {
-  if (currentTask) {
-    currentTask.remove();
-    saveTasks();
+columnsContainer.addEventListener("change", (event) => {
+  if (event.target.matches(".sort-option")) {
+    const column = event.target.closest(".column");
+    sortTasks(column, event.target.value);
   }
 });
-modal.querySelector("#cancel").addEventListener("click", () => modal.close());
-modal.addEventListener("close", () => (currentTask = null));
 
-// 8. get tasks data from local storage when page loads
+// INIT
 loadTasks();
